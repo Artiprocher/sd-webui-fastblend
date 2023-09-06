@@ -1,5 +1,5 @@
 # FastBlend Extension for Stable-Diffusion-Webui
-This is an extension of [Stable-Diffusion-Webui]([AUTOMATIC1111/stable-diffusion-webui: Stable Diffusion web UI (github.com)](https://github.com/AUTOMATIC1111/stable-diffusion-webui)). You can use this extension to make your video smooth! Let's say goodbye to flicker.
+This is an extension of [Stable-Diffusion-Webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui). You can use this extension to make your video smooth! Let's say goodbye to flicker.
 
 ## Installation
 
