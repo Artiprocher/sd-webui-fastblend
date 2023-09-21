@@ -331,7 +331,6 @@ class TableManager:
         tasks = self.task_list(n)
         remapping_table = [[(frames_style[i], 1)] for i in range(n)]
         for batch_id in tqdm(range(0, len(tasks), batch_size), desc=desc):
-            print(desc, f"task: {batch_id}/{len(tasks)}")
             tasks_batch = tasks[batch_id: min(batch_id+batch_size, len(tasks))]
             source_guide = np.stack([frames_guide[task["source"]] for task in tasks_batch])
             target_guide = np.stack([frames_guide[task["target"]] for task in tasks_batch])
@@ -387,7 +386,6 @@ class TableManager:
                 else:
                     frames_result.append(blending_table[target][level])
         for batch_id in tqdm(range(0, len(tasks), batch_size), desc=desc):
-            print(desc, f"task: {batch_id}/{len(tasks)}")
             tasks_batch = tasks[batch_id: min(batch_id+batch_size, len(tasks))]
             source_guide = np.stack([frames_guide[task["source"]] for task in tasks_batch])
             target_guide = np.stack([frames_guide[task["target"]] for task in tasks_batch])
@@ -489,7 +487,6 @@ class AccurateModeRunner:
         # run
         n = len(frames_style)
         for target in tqdm(range(n), desc=desc):
-            print(desc, f"frame: {target}/{n}")
             l, r = max(target - window_size, 0), min(target + window_size + 1, n)
             remapped_frames = []
             for i in range(l, r, batch_size):
@@ -513,20 +510,6 @@ def read_video(file_name):
         video.append(frame)
     reader.close()
     return video
-
-
-def align_frames(video1, video2):
-    num_frames = min(len(video1), len(video2))
-    video1, video2 = video1[:num_frames], video2[:num_frames]
-    video1_resized = []
-    height, width, _ = video2[0].shape
-    for frame1, frame2 in zip(video1, video2):
-        if frame1.shape!=frame2.shape:
-            frame1 = Image.fromarray(frame1)
-            frame1 = frame1.resize((width, height))
-            frame1 = np.array(frame1)
-        video1_resized.append(frame1)
-    return video1_resized, video2
 
 
 def get_video_fps(file_name):
@@ -559,9 +542,71 @@ class LowMemoryVideo:
         self.reader.close()
 
 
+def split_file_name(file_name):
+    result = []
+    number = -1
+    for i in file_name:
+        if ord(i)>=ord("0") and ord(i)<=ord("9"):
+            if number == -1:
+                number = 0
+            number = number*10 + ord(i) - ord("0")
+        else:
+            if number != -1:
+                result.append(number)
+                number = -1
+            result.append(i)
+    if number != -1:
+        result.append(number)
+    result = tuple(result)
+    return result
+
+
+def search_for_images(folder):
+    file_list = [i for i in os.listdir(folder) if i.endswith(".jpg") or i.endswith(".png")]
+    file_list = [(split_file_name(file_name), file_name) for file_name in file_list]
+    file_list = [i[1] for i in sorted(file_list)]
+    file_list = [os.path.join(folder, i) for i in file_list]
+    return file_list
+
+
+def read_images(folder):
+    file_list = search_for_images(folder)
+    frames = [np.array(Image.open(i)) for i in file_list]
+    return frames
+
+
+class LowMemoryImageFolder:
+    def __init__(self, folder):
+        self.file_list = search_for_images(folder)
+    
+    def __len__(self):
+        return len(self.file_list)
+
+    def __getitem__(self, item):
+        return np.array(Image.open(self.file_list[item]))
+
+    def __del__(self):
+        pass
+
+
+def get_video_data_structure(video_file, image_folder, low_ram):
+    if video_file is not None:
+        if low_ram:
+            return LowMemoryVideo(video_file)
+        else:
+            return read_video(video_file)
+    else:
+        if low_ram:
+            return LowMemoryImageFolder(image_folder)
+        else:
+            return read_images(image_folder)
+
+
 def smooth_video(
     video_guide,
+    video_guide_folder,
     video_style,
+    video_style_folder,
     mode,
     low_ram,
     window_size,
@@ -571,20 +616,24 @@ def smooth_video(
     num_iter,
     guide_weight,
     initialize,
-    progress = gr.Progress(track_tqdm=True),
+    progress = None,
 ):
     # input
-    if mode=="Accurate" and low_ram:
-        frames_guide = LowMemoryVideo(video_guide)
-        frames_style = LowMemoryVideo(video_style)
-    else:
-        frames_guide = read_video(video_guide)
-        frames_style = read_video(video_style)
-        frames_guide, frames_style = align_frames(frames_guide, frames_style)
+    if mode=="Fast":
+        low_ram = False
+    frames_guide = get_video_data_structure(video_guide, video_guide_folder, low_ram)
+    frames_style = get_video_data_structure(video_style, video_style_folder, low_ram)
     # output
-    if output_path=="" or not os.path.exists(output_path):
-        output_path = os.path.join(os.path.split(video_style)[0], "output")
+    if output_path == "":
+        if video_style is None:
+            output_path = os.path.join(video_style_folder, "output")
+        else:
+            output_path = os.path.join(os.path.split(video_style)[0], "output")
+        os.makedirs(output_path, exist_ok=True)
         print("No valid output_path. Your video will be saved here:", output_path)
+    elif not os.path.exists(output_path):
+        os.makedirs(output_path, exist_ok=True)
+        print("Your video will be saved here:", output_path)
     frames_path = os.path.join(output_path, "frames")
     video_path = os.path.join(output_path, "video.mp4")
     os.makedirs(frames_path, exist_ok=True)
@@ -602,16 +651,27 @@ def smooth_video(
     elif mode == "Accurate":
         AccurateModeRunner().run(frames_guide, frames_style, batch_size=batch_size, window_size=window_size, ebsynth_config=ebsynth_config, save_path=frames_path)
     # output
-    video_path = save_video(frames_path, video_path, num_frames=len(frames_style), fps=get_video_fps(video_style))
+    fps = get_video_fps(video_style) if video_style is not None else 30
+    video_path = save_video(frames_path, video_path, num_frames=len(frames_style), fps=fps)
     return output_path, video_path
 
 
 def on_ui_tabs():
     with gr.Blocks(analytics_enabled=False) as ui_component:
         with gr.Row():
-            video_guide = gr.Video(label="Guide video")
-            video_style = gr.Video(label="Style video")
-            video_output = gr.Video(label="Output video", interactive=False, show_share_button=True)
+            with gr.Column():
+                with gr.Tab("Guide video"):
+                    video_guide = gr.Video(label="Guide video")
+                with gr.Tab("Guide video (images format)"):
+                    video_guide_folder = gr.Textbox(label="Guide video (images format)", value="")
+            with gr.Column():
+                with gr.Tab("Style video"):
+                    video_style = gr.Video(label="Style video")
+                with gr.Tab("Style video (images format)"):
+                    video_style_folder = gr.Textbox(label="Style video (images format)", value="")
+            with gr.Column():
+                video_output = gr.Video(label="Output video", interactive=False, show_share_button=True)
+                output_path = gr.Textbox(label="Output directory", value="")
         btn = gr.Button(value="Run")
         with gr.Row():
             with gr.Column():
@@ -620,7 +680,6 @@ def on_ui_tabs():
                 low_ram = gr.Checkbox(label="Low RAM (only for accurate mode)", value=False)
                 window_size = gr.Slider(label="Sliding window size", value=15, minimum=1, maximum=1000, step=1)
                 batch_size = gr.Slider(label="Batch size", value=8, minimum=1, maximum=128, step=1)
-                output_path = gr.Textbox(label="Output directory", value="")
                 gr.Markdown("## Advanced Settings")
                 minimum_patch_size = gr.Slider(label="Minimum patch size (odd number)", value=5, minimum=5, maximum=99, step=2)
                 num_iter = gr.Slider(label="Number of iterations", value=5, minimum=1, maximum=10, step=1)
@@ -656,7 +715,9 @@ def on_ui_tabs():
             smooth_video,
             inputs=[
                 video_guide,
+                video_guide_folder,
                 video_style,
+                video_style_folder,
                 mode,
                 low_ram,
                 window_size,
