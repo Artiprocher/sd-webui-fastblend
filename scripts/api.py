@@ -491,9 +491,9 @@ class AccurateModeRunner:
             remapped_frames = []
             for i in range(l, r, batch_size):
                 j = min(i + batch_size, r)
-                source_guide = np.stack(frames_guide[source] for source in range(i, j))
+                source_guide = np.stack([frames_guide[source] for source in range(i, j)])
                 target_guide = np.stack([frames_guide[target]] * (j - i))
-                source_style = np.stack(frames_style[source] for source in range(i, j))
+                source_style = np.stack([frames_style[source] for source in range(i, j)])
                 _, target_style = patch_match_engine.estimate_nnf(source_guide, target_guide, source_style)
                 remapped_frames.append(target_style)
             frame = np.concatenate(remapped_frames, axis=0).mean(axis=0)
