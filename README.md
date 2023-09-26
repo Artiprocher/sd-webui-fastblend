@@ -13,6 +13,8 @@ This is an extension of [Stable-Diffusion-Webui](https://github.com/AUTOMATIC111
 
 ## Example
 
+### Blend
+
 https://github.com/Artiprocher/sd-webui-fastblend/assets/35051019/208d902d-6aba-48d7-b7d5-cd120ebd306d
 
 1. The original video is [here](https://www.bilibili.com/video/BV1K14y1Z7cp/). We only use the first 236 frames.
@@ -44,3 +46,6 @@ https://github.com/Artiprocher/sd-webui-fastblend/assets/35051019/208d902d-6aba-
 4. Click "Run". Wait a minute... (I tested this extension on an Nvidia RTX3060 laptop. It cost about half hours.)
 5. Now you have obtained a fluent video. Go to "Extras" to upscale it using "R-ESRGAN 4+ Anime6B".
 
+### Interpolate
+
+https://github.com/Artiprocher/sd-webui-fastblend/assets/35051019/3490c5b4-8f67-478f-86de-f9adc2ace16a
