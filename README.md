@@ -11,6 +11,8 @@ This is an extension of [Stable-Diffusion-Webui](https://github.com/AUTOMATIC111
 6. Go to "Installed" tab, click "Check for updates", and then click "Apply and restart UI".
 7. Enjoy the coherent and fluent videos!
 
+**If you used a previous version of FastBlend, you need to clean the `ui-config.json` before you use the new version. The file `ui-config.json` is in the root directory of webui, please remove the lines that starts with `extension_FastBlend` or directly remove all lines (It's OK. Don't be afraid.).**
+
 ## Example
 
 ### Blend
