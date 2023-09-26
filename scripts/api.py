@@ -1072,7 +1072,7 @@ Given a guide video and a style video, this algorithm will make the style video 
             gr.Markdown("""
 # Interpolate
 
-Given a guide video and some rendered keyframes, this algorithm will render the remaining frames.
+Given a guide video and some rendered keyframes, this algorithm will render the remaining frames. Click [here](https://github.com/Artiprocher/sd-webui-fastblend/assets/35051019/3490c5b4-8f67-478f-86de-f9adc2ace16a) to see the example. The algorithm is experimental and is only tested for 512*512 resolution.
             """)
             with gr.Row():
                 with gr.Column():
@@ -1094,7 +1094,7 @@ Given a guide video and some rendered keyframes, this algorithm will render the 
                     gr.Markdown("# Settings")
                     batch_size_ = gr.Slider(label="Batch size", value=8, minimum=1, maximum=128, step=1, interactive=True)
                     gr.Markdown("## Advanced Settings")
-                    minimum_patch_size_ = gr.Slider(label="Minimum patch size (odd number)", value=15, minimum=5, maximum=99, step=2, interactive=True)
+                    minimum_patch_size_ = gr.Slider(label="Minimum patch size (odd number, larger is better)", value=15, minimum=5, maximum=99, step=2, interactive=True)
                     num_iter_ = gr.Slider(label="Number of iterations", value=5, minimum=1, maximum=10, step=1, interactive=True)
                     guide_weight_ = gr.Slider(label="Guide weight", value=10.0, minimum=0.0, maximum=100.0, step=0.1, interactive=True)
                     initialize_ = gr.Radio(["identity", "random"], label="NNF initialization", value="identity", interactive=True)
