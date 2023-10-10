@@ -1,7 +1,10 @@
 # FastBlend Extension for Stable-Diffusion-Webui
-This is an extension of [Stable-Diffusion-Webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui). You can use this extension to make your video smooth! Let's say goodbye to flicker.
 
-## Installation
+This is a model-free algorithm that can make your video smooth. You can remove the flicker in your video, or render a fluent video using a series of keyframes.
+
+## Usage
+
+### Use FastBlend in [Stable-Diffusion-Webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
 
 1. Open "Extensions" tab.
 2. Open "Install from URL" tab in the tab.
@@ -9,9 +12,64 @@ This is an extension of [Stable-Diffusion-Webui](https://github.com/AUTOMATIC111
 4. Press "Install" button.
 5. Wait for 5 seconds, and you will see the message "Installed into stable-diffusion-webui\extensions\sd-webui-fastblend. Use Installed tab to restart".
 6. Go to "Installed" tab, click "Check for updates", and then click "Apply and restart UI".
-7. Enjoy the coherent and fluent videos!
+7. You can see a `FastBlend` tab in the webui.
+8. Enjoy the coherent and fluent videos!
 
 **If you used a previous version of FastBlend, you need to clean the `ui-config.json` before you use the new version. The file `ui-config.json` is in the root directory of webui, please remove the lines that starts with `extension_FastBlend` or directly remove all lines (Only leave an empty `{}`. It's OK. Don't be afraid.).**
+
+### Use FastBlend in the Independent Webui
+
+Install the packages in your Python environment:
+
+```
+pip install gradio numpy imageio imageio[ffmpeg] opencv-python-headless tqdm cupy-cuda11x
+```
+
+If your CUDA version is not v11.2 ~ 11.8, please read [this document](https://docs.cupy.dev/en/stable/install.html) and install the corressponding version of cupy.
+
+Then run the following command to launch the independent webui:
+
+```
+python independent_webui.py
+```
+
+### Use FastBlend in your Python code
+
+Install the packages as we described above.
+
+```python3
+from FastBlend.api import smooth_video, interpolate_video
+
+# Blend
+smooth_video(
+    video_guide = "guide_video.mp4",
+    video_guide_folder = None,
+    video_style = "style_video.mp4",
+    video_style_folder = None,
+    mode = "Fast",
+    window_size = 15,
+    batch_size = 16,
+    tracking_window_size = 0,
+    output_path = "output_folder",
+    minimum_patch_size = 5,
+    num_iter = 5,
+    guide_weight = 10.0,
+    initialize = "identity"
+)
+
+# Interpolate
+interpolate_video(
+    frames_path = "frames_folder",
+    keyframes_path = "keyframes_folder",
+    output_path = "output_folder",
+    batch_size = 16,
+    tracking_window_size = 1,
+    minimum_patch_size = 15,
+    num_iter = 5,
+    guide_weight = 10.0,
+    initialize = "identity"
+)
+```
 
 ## Example
 
