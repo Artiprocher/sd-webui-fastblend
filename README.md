@@ -131,3 +131,18 @@ https://github.com/Artiprocher/sd-webui-fastblend/assets/35051019/3490c5b4-8f67-
    5. NNF initialization: identity
 4. Click "Run". Wait a minute... (I tested this extension on an Nvidia RTX3060 laptop. It cost 3 minutes.)
 5. Now you have obtained a fluent video. Go to "Extras" to upscale it using "R-ESRGAN 4+ Anime6B".
+
+### Compare FastBlend with CoDeF
+
+https://github.com/Artiprocher/sd-webui-fastblend/assets/35051019/f628426d-caee-493a-b7e7-0372150f3ce1
+
+We found an interesting project called [CoDeF](https://github.com/qiuyu96/CoDeF), which use only one keyframe to render a video. We collected some videos from [their project page](https://qiuyu96.github.io/CoDeF/) and compare FastBlend with CoDeF. For each video, we select one keyframe from the rendered video, and use this keyframe to rerender the video in interpolation mode. The parameters are
+
+1. Batch size: 48
+2. Tracking Window Size: 1
+3. Minimum patch size (odd number, larger is better): 25
+4. Number of iterations: 5
+5. Guide weight: 10
+6. NNF initialization: identity
+
+As we can see, FastBlend is competitive with CoDeF. What's more, FastBlend is very efficiency. We noly need one minute to render a video clip!
