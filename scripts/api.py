@@ -31,6 +31,7 @@ def smooth_video(
     mode,
     window_size,
     batch_size,
+    tracking_window_size,
     output_path,
     minimum_patch_size,
     num_iter,
@@ -57,13 +58,16 @@ def smooth_video(
     video_path = os.path.join(output_path, "video.mp4")
     os.makedirs(frames_path, exist_ok=True)
     # process
+    if mode == "Fast":
+        tracking_window_size = 0
     ebsynth_config = {
         "minimum_patch_size": minimum_patch_size,
         "threads_per_block": 8,
         "num_iter": num_iter,
         "gpu_id": 0,
         "guide_weight": guide_weight,
-        "initialize": initialize
+        "initialize": initialize,
+        "tracking_window_size": tracking_window_size,
     }
     if mode == "Fast":
         FastModeRunner().run(frames_guide, frames_style, batch_size=batch_size, window_size=window_size, ebsynth_config=ebsynth_config, save_path=frames_path)
@@ -259,6 +263,7 @@ Given a guide video and a style video, this algorithm will make the style video 
                     mode = gr.Radio(["Fast", "Accurate"], label="Inference mode", value="Fast", interactive=True)
                     window_size = gr.Slider(label="Sliding window size", value=15, minimum=1, maximum=1000, step=1, interactive=True)
                     batch_size = gr.Slider(label="Batch size", value=8, minimum=1, maximum=128, step=1, interactive=True)
+                    tracking_window_size = gr.Slider(label="Tracking window size (only for accurate mode)", value=0, minimum=0, maximum=10, step=1, interactive=True)
                     gr.Markdown("## Advanced Settings")
                     minimum_patch_size = gr.Slider(label="Minimum patch size (odd number)", value=5, minimum=5, maximum=99, step=2, interactive=True)
                     num_iter = gr.Slider(label="Number of iterations", value=5, minimum=1, maximum=10, step=1, interactive=True)
@@ -298,6 +303,7 @@ Given a guide video and a style video, this algorithm will make the style video 
                     mode,
                     window_size,
                     batch_size,
+                    tracking_window_size,
                     output_path,
                     minimum_patch_size,
                     num_iter,
