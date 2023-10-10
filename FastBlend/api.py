@@ -1,4 +1,4 @@
-from .runners import AccurateModeRunner, FastModeRunner, InterpolationModeRunner, InterpolationModeSingleFrameRunner
+from .runners import AccurateModeRunner, FastModeRunner, BalancedModeRunner, InterpolationModeRunner, InterpolationModeSingleFrameRunner
 from .data import VideoData, get_video_fps, save_video, search_for_images
 import os
 import gradio as gr
@@ -57,7 +57,7 @@ def smooth_video(
     video_path = os.path.join(output_path, "video.mp4")
     os.makedirs(frames_path, exist_ok=True)
     # process
-    if mode == "Fast":
+    if mode == "Fast" or mode == "Balanced":
         tracking_window_size = 0
     ebsynth_config = {
         "minimum_patch_size": minimum_patch_size,
@@ -70,6 +70,8 @@ def smooth_video(
     }
     if mode == "Fast":
         FastModeRunner().run(frames_guide, frames_style, batch_size=batch_size, window_size=window_size, ebsynth_config=ebsynth_config, save_path=frames_path)
+    elif mode == "Balanced":
+        BalancedModeRunner().run(frames_guide, frames_style, batch_size=batch_size, window_size=window_size, ebsynth_config=ebsynth_config, save_path=frames_path)
     elif mode == "Accurate":
         AccurateModeRunner().run(frames_guide, frames_style, batch_size=batch_size, window_size=window_size, ebsynth_config=ebsynth_config, save_path=frames_path)
     # output
@@ -259,7 +261,7 @@ Given a guide video and a style video, this algorithm will make the style video 
             with gr.Row():
                 with gr.Column():
                     gr.Markdown("# Settings")
-                    mode = gr.Radio(["Fast", "Accurate"], label="Inference mode", value="Fast", interactive=True)
+                    mode = gr.Radio(["Fast", "Balanced", "Accurate"], label="Inference mode", value="Fast", interactive=True)
                     window_size = gr.Slider(label="Sliding window size", value=15, minimum=1, maximum=1000, step=1, interactive=True)
                     batch_size = gr.Slider(label="Batch size", value=8, minimum=1, maximum=128, step=1, interactive=True)
                     tracking_window_size = gr.Slider(label="Tracking window size (only for accurate mode)", value=0, minimum=0, maximum=10, step=1, interactive=True)
