@@ -15,8 +15,6 @@ This is a model-free algorithm that can make your video smooth. You can remove t
 7. You can see a `FastBlend` tab in the webui.
 8. Enjoy the coherent and fluent videos!
 
-**If you used a previous version of FastBlend, you need to clean the `ui-config.json` before you use the new version. The file `ui-config.json` is in the root directory of webui, please remove the lines that starts with `extension_FastBlend` or directly remove all lines (Only leave an empty `{}`. It's OK. Don't be afraid.).**
-
 ### Use FastBlend in the Independent Webui
 
 Install the packages in your Python environment:
