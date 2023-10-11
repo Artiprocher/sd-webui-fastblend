@@ -1,4 +1,4 @@
-# Fastblend: a Model-Free Algorithm That Can Make Your Video Smooth
+# FastBlend: a Model-Free Algorithm That Can Make Your Video Smooth
 
 This is a model-free algorithm that can make your video smooth. You can remove the flicker in your video, or render a fluent video using a series of keyframes.
 
@@ -135,7 +135,7 @@ https://github.com/Artiprocher/sd-webui-fastblend/assets/35051019/3490c5b4-8f67-
 
 https://github.com/Artiprocher/sd-webui-fastblend/assets/35051019/f628426d-caee-493a-b7e7-0372150f3ce1
 
-We found an interesting project called [CoDeF](https://github.com/qiuyu96/CoDeF), which use only one keyframe to render a video. We collected some videos from [their project page](https://qiuyu96.github.io/CoDeF/) and compare FastBlend with CoDeF. For each video, we select one keyframe from the rendered video, and use this keyframe to rerender the video in interpolation mode. The parameters are
+We found an interesting project called [CoDeF](https://github.com/qiuyu96/CoDeF), which uses only one keyframe to render a video. We collected some videos from [their project page](https://qiuyu96.github.io/CoDeF/) and compared FastBlend with CoDeF. For each video, we select one keyframe from the rendered video and use this keyframe to rerender the video in interpolation mode. The parameters are
 
 1. Batch size: 48
 2. Tracking Window Size: 1
@@ -144,4 +144,4 @@ We found an interesting project called [CoDeF](https://github.com/qiuyu96/CoDeF)
 5. Guide weight: 10
 6. NNF initialization: identity
 
-As we can see, FastBlend is competitive with CoDeF. What's more, FastBlend is very efficiency. We noly need one minute to render a video clip!
+As we can see, FastBlend is competitive with CoDeF. What's more, FastBlend is very efficiency. We only need one minute to render a video clip!
