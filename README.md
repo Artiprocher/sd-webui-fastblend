@@ -1,4 +1,4 @@
-# FastBlend Extension for Stable-Diffusion-Webui
+# Fastblend: a Model-Free Algorithm That Can Make Your Video Smooth
 
 This is a model-free algorithm that can make your video smooth. You can remove the flicker in your video, or render a fluent video using a series of keyframes.
 
@@ -125,10 +125,11 @@ https://github.com/Artiprocher/sd-webui-fastblend/assets/35051019/3490c5b4-8f67-
    13. Version: v1.6.0
 3. Open "FastBlend" tab. Click "Interpolate". Fill in the directory of original frames and the rendered keyframes. We use the following settings:
    1. Batch size: 8
-   2. Minimum patch size (odd number, larger is better): 15
-   3. Number of iterations: 5
-   4. Guide weight: 10
-   5. NNF initialization: identity
+   2. Tracking window size: 0
+   3. Minimum patch size (odd number, larger is better): 15
+   4. Number of iterations: 5
+   5. Guide weight: 10
+   6. NNF initialization: identity
 4. Click "Run". Wait a minute... (I tested this extension on an Nvidia RTX3060 laptop. It cost 3 minutes.)
 5. Now you have obtained a fluent video. Go to "Extras" to upscale it using "R-ESRGAN 4+ Anime6B".
 

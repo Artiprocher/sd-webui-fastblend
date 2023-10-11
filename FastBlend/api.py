@@ -276,18 +276,16 @@ Given a guide video and a style video, this algorithm will make the style video 
 
 * Output directory: the directory to save the video.
 * Inference mode
-    * Fast
-        * Blend the frames using a tree-like data structure, which requires much RAM but is fast.
-        * The time consumed is not relavant to the size of sliding window, thus you can use a very large sliding window.
-        * This inference mode doesn't support low RAM.
-    * Accurate
-        * Blend the frames and align them together for higher video quality.
-        * The time consumed is in direct proportion to the size of sliding window.
-        * This inference mode supports low RAW.
-        * When [batch size] >= [sliding window size] * 2 + 1, the performance is the best.
-* Low RAM: if you don't have enough RAM, please use it. Note that it doesn't work in fast mode.
+
+|Mode|Time|Memory|Quality|Frame by frame output|Description|
+|-|-|-|-|-|-|
+|Fast|■|■■■|■■|No|Blend the frames using a tree-like data structure, which requires much RAM but is fast.|
+|Balanced|■■|■|■■|Yes|Blend the frames naively.|
+|Accurate|■■■|■|■■■|Yes|Blend the frames and align them together for higher video quality. When [batch size] >= [sliding window size] * 2 + 1, the performance is the best.|
+
 * Sliding window size: our algorithm will blend the frames in a sliding windows. If the size is n, each frame will be blended with the last n frames and the next n frames. A large sliding window can make the video fluent but sometimes smoggy.
 * Batch size: a larger batch size makes the program faster but requires more VRAM.
+* Tracking window size (only for accurate mode): The size of window in which our algorithm tracks moving objects. Empirically, 1 is enough.
 * Advanced settings
     * Minimum patch size (odd number): the minimum patch size used for patch matching. (Default: 5)
     * Number of iterations: the number of iterations of patch matching. (Default: 5)
@@ -350,6 +348,7 @@ Given a guide video and some rendered keyframes, this algorithm will render the 
 
 * Output directory: the directory to save the video.
 * Batch size: a larger batch size makes the program faster but requires more VRAM.
+* Tracking window size (only for accurate mode): The size of window in which our algorithm tracks moving objects. Empirically, 1 is enough.
 * Advanced settings
     * Minimum patch size (odd number): the minimum patch size used for patch matching. **This parameter should be larger than that in blending. (Default: 15)**
     * Number of iterations: the number of iterations of patch matching. (Default: 5)
@@ -372,4 +371,4 @@ Given a guide video and some rendered keyframes, this algorithm will render the 
                 outputs=[output_path_, video_output_]
             )
 
-        return [(ui_component, "FastBlend", "extension_FastBlend")]
+        return [(ui_component, "FastBlend", "FastBlend_ui")]
