@@ -77,6 +77,9 @@ def smooth_video(
     # output
     fps = get_video_fps(video_style) if video_style is not None else 30
     video_path = save_video(frames_path, video_path, num_frames=len(frames_style), fps=fps)
+    print("Success!")
+    print("Your frames are here:", frames_path)
+    print("Your video is here:", video_path)
     return output_path, video_path
 
 
@@ -232,6 +235,9 @@ def interpolate_video(
     else:
         InterpolationModeRunner().run(frames_guide, frames_style, index_style, batch_size=batch_size, ebsynth_config=ebsynth_config, save_path=output_frames_path)
     video_path = save_video(output_frames_path, output_video_path, num_frames=len(frames_guide), fps=30)
+    print("Success!")
+    print("Your frames are here:", output_frames_path)
+    print("Your video is here:", video_path)
     return output_path, video_path
 
 

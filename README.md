@@ -145,3 +145,36 @@ We found an interesting project called [CoDeF](https://github.com/qiuyu96/CoDeF)
 6. NNF initialization: identity
 
 As we can see, FastBlend is competitive with CoDeF. What's more, FastBlend is very efficiency. We only need one minute to render a video clip!
+
+## Reference
+
+### Blend
+
+* Output directory: the directory to save the video.
+* Inference mode
+
+|Mode|Time|Memory|Quality|Frame by frame output|Description|
+|-|-|-|-|-|-|
+|Fast|■|■■■|■■|No|Blend the frames using a tree-like data structure, which requires much RAM but is fast.|
+|Balanced|■■|■|■■|Yes|Blend the frames naively.|
+|Accurate|■■■|■|■■■|Yes|Blend the frames and align them together for higher video quality. When [batch size] >= [sliding window size] * 2 + 1, the performance is the best.|
+
+* Sliding window size: our algorithm will blend the frames in a sliding windows. If the size is n, each frame will be blended with the last n frames and the next n frames. A large sliding window can make the video fluent but sometimes smoggy.
+* Batch size: a larger batch size makes the program faster but requires more VRAM.
+* Tracking window size (only for accurate mode): The size of window in which our algorithm tracks moving objects. Empirically, 1 is enough.
+* Advanced settings
+    * Minimum patch size (odd number): the minimum patch size used for patch matching. (Default: 5)
+    * Number of iterations: the number of iterations of patch matching. (Default: 5)
+    * Guide weight: a parameter that determines how much motion feature applied to the style video. (Default: 10)
+    * NNF initialization: how to initialize the NNF (Nearest Neighbor Field). (Default: identity)
+
+### Interpolate
+
+* Output directory: the directory to save the video.
+* Batch size: a larger batch size makes the program faster but requires more VRAM.
+* Tracking window size (only for accurate mode): The size of window in which our algorithm tracks moving objects. Empirically, 1 is enough.
+* Advanced settings
+    * Minimum patch size (odd number): the minimum patch size used for patch matching. **This parameter should be larger than that in blending. (Default: 15)**
+    * Number of iterations: the number of iterations of patch matching. (Default: 5)
+    * Guide weight: a parameter that determines how much motion feature applied to the style video. (Default: 10)
+    * NNF initialization: how to initialize the NNF (Nearest Neighbor Field). (Default: identity)
