@@ -32,6 +32,7 @@ def smooth_video(
     batch_size,
     tracking_window_size,
     output_path,
+    fps,
     minimum_patch_size,
     num_iter,
     guide_weight,
@@ -75,12 +76,17 @@ def smooth_video(
     elif mode == "Accurate":
         AccurateModeRunner().run(frames_guide, frames_style, batch_size=batch_size, window_size=window_size, ebsynth_config=ebsynth_config, save_path=frames_path)
     # output
-    fps = get_video_fps(video_style) if video_style is not None else 30
+    try:
+        fps = int(fps)
+    except:
+        fps = get_video_fps(video_style) if video_style is not None else 30
+    print("Fps:", fps)
+    print("Saving video...")
     video_path = save_video(frames_path, video_path, num_frames=len(frames_style), fps=fps)
     print("Success!")
     print("Your frames are here:", frames_path)
     print("Your video is here:", video_path)
-    return output_path, video_path
+    return output_path, fps, video_path
 
 
 class KeyFrameMatcher:
@@ -197,6 +203,7 @@ def interpolate_video(
     frames_path,
     keyframes_path,
     output_path,
+    fps,
     batch_size,
     tracking_window_size,
     minimum_patch_size,
@@ -234,11 +241,17 @@ def interpolate_video(
         InterpolationModeSingleFrameRunner().run(frames_guide, frames_style, index_style, batch_size=batch_size, ebsynth_config=ebsynth_config, save_path=output_frames_path)
     else:
         InterpolationModeRunner().run(frames_guide, frames_style, index_style, batch_size=batch_size, ebsynth_config=ebsynth_config, save_path=output_frames_path)
-    video_path = save_video(output_frames_path, output_video_path, num_frames=len(frames_guide), fps=30)
+    try:
+        fps = int(fps)
+    except:
+        fps = 30
+    print("Fps:", fps)
+    print("Saving video...")
+    video_path = save_video(output_frames_path, output_video_path, num_frames=len(frames_guide), fps=fps)
     print("Success!")
     print("Your frames are here:", output_frames_path)
     print("Your video is here:", video_path)
-    return output_path, video_path
+    return output_path, fps, video_path
 
 
 def on_ui_tabs():
@@ -262,6 +275,7 @@ Given a guide video and a style video, this algorithm will make the style video 
                         video_style_folder = gr.Textbox(label="Style video (images format)", value="")
                 with gr.Column():
                     output_path = gr.Textbox(label="Output directory", value="", placeholder="Leave empty to use the directory of style video")
+                    fps = gr.Textbox(label="Fps", value="", placeholder="Leave empty to use the default fps")
                     video_output = gr.Video(label="Output video", interactive=False, show_share_button=True)
             btn = gr.Button(value="Blend")
             with gr.Row():
@@ -310,12 +324,13 @@ Given a guide video and a style video, this algorithm will make the style video 
                     batch_size,
                     tracking_window_size,
                     output_path,
+                    fps,
                     minimum_patch_size,
                     num_iter,
                     guide_weight,
                     initialize
                 ],
-                outputs=[output_path, video_output]
+                outputs=[output_path, fps, video_output]
             )
         with gr.Tab("Interpolate"):
             gr.Markdown("""
@@ -336,6 +351,7 @@ Given a guide video and some rendered keyframes, this algorithm will render the 
                     rendered_keyframes_.change(detect_frames, inputs=[video_guide_folder_, rendered_keyframes_], outputs=detected_frames)
                 with gr.Column():
                     output_path_ = gr.Textbox(label="Output directory", value="", placeholder="Leave empty to use the directory of rendered keyframes")
+                    fps_ = gr.Textbox(label="Fps", value="", placeholder="Leave empty to use the default fps")
                     video_output_ = gr.Video(label="Output video", interactive=False, show_share_button=True)
             btn_ = gr.Button(value="Interpolate")
             with gr.Row():
@@ -367,6 +383,7 @@ Given a guide video and some rendered keyframes, this algorithm will render the 
                     video_guide_folder_,
                     rendered_keyframes_,
                     output_path_,
+                    fps_,
                     batch_size_,
                     tracking_window_size_,
                     minimum_patch_size_,
@@ -374,7 +391,7 @@ Given a guide video and some rendered keyframes, this algorithm will render the 
                     guide_weight_,
                     initialize_,
                 ],
-                outputs=[output_path_, video_output_]
+                outputs=[output_path_, fps_, video_output_]
             )
 
         return [(ui_component, "FastBlend", "FastBlend_ui")]
