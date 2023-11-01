@@ -2,10 +2,13 @@ import cupy as cp
 import cv2
 import numpy as np
 
-from FastBlend.cupy_kernels import (
-    pairwise_patch_error_kernel,
-    patch_error_kernel,
-    remapping_kernel,
+from FastBlend.cupy_kernels import KernelManager
+
+kernel_mgr = KernelManager()
+kernel_mgr.AddKernel(filename="remap.cu", funcname="remap")
+kernel_mgr.AddKernel(filename="patch_error.cu", funcname="patch_error")
+kernel_mgr.AddKernel(
+    filename="pairwise_patch_error.cu", funcname="pairwise_patch_error"
 )
 
 
@@ -16,7 +19,7 @@ class PatchMatcher:
         width,
         channel,
         minimum_patch_size,
-        threads_per_block=8,
+        threads_per_block=32,
         num_iter=5,
         gpu_id=0,
         guide_weight=10.0,
@@ -77,7 +80,7 @@ class PatchMatcher:
             ),
             dtype=cp.float32,
         )
-        remapping_kernel(
+        kernel_mgr.remap(
             self.grid + (batch_size,),
             self.block,
             (
@@ -96,7 +99,7 @@ class PatchMatcher:
     def get_patch_error(self, source, nnf, target):
         batch_size = source.shape[0]
         error = cp.zeros((batch_size, self.height, self.width), dtype=cp.float32)
-        patch_error_kernel(
+        kernel_mgr.patch_error(
             self.grid + (batch_size,),
             self.block,
             (
@@ -118,7 +121,7 @@ class PatchMatcher:
         error = cp.zeros((batch_size, self.height, self.width), dtype=cp.float32)
         source_a, nnf_a = source[0::2].copy(), nnf[0::2].copy()
         source_b, nnf_b = source[1::2].copy(), nnf[1::2].copy()
-        pairwise_patch_error_kernel(
+        kernel_mgr.pairwise_patch_error(
             self.grid + (batch_size,),
             self.block,
             (
