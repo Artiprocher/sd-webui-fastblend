@@ -1,4 +1,6 @@
-import imageio, os
+import os
+
+import imageio
 import numpy as np
 from PIL import Image
 
@@ -32,7 +34,7 @@ def save_video(frames_path, video_path, num_frames, fps):
 class LowMemoryVideo:
     def __init__(self, file_name):
         self.reader = imageio.get_reader(file_name)
-    
+
     def __len__(self):
         return self.reader.count_frames()
 
@@ -47,10 +49,10 @@ def split_file_name(file_name):
     result = []
     number = -1
     for i in file_name:
-        if ord(i)>=ord("0") and ord(i)<=ord("9"):
+        if ord(i) >= ord("0") and ord(i) <= ord("9"):
             if number == -1:
                 number = 0
-            number = number*10 + ord(i) - ord("0")
+            number = number * 10 + ord(i) - ord("0")
         else:
             if number != -1:
                 result.append(number)
@@ -63,7 +65,9 @@ def split_file_name(file_name):
 
 
 def search_for_images(folder):
-    file_list = [i for i in os.listdir(folder) if i.endswith(".jpg") or i.endswith(".png")]
+    file_list = [
+        i for i in os.listdir(folder) if i.endswith(".jpg") or i.endswith(".png")
+    ]
     file_list = [(split_file_name(file_name), file_name) for file_name in file_list]
     file_list = [i[1] for i in sorted(file_list)]
     file_list = [os.path.join(folder, i) for i in file_list]
@@ -81,8 +85,10 @@ class LowMemoryImageFolder:
         if file_list is None:
             self.file_list = search_for_images(folder)
         else:
-            self.file_list = [os.path.join(folder, file_name) for file_name in file_list]
-    
+            self.file_list = [
+                os.path.join(folder, file_name) for file_name in file_list
+            ]
+
     def __len__(self):
         return len(self.file_list)
 

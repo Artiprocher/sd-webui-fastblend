@@ -1,6 +1,7 @@
 import cupy as cp
 
-remapping_kernel = cp.RawKernel(r'''
+remapping_kernel = cp.RawKernel(
+    r"""
 extern "C" __global__
 void remap(
     const int height,
@@ -40,10 +41,13 @@ void remap(
         target_style[z + pid * channel + c] /= num;
     }
 }
-''', 'remap')
+""",
+    "remap",
+)
 
 
-patch_error_kernel = cp.RawKernel(r'''
+patch_error_kernel = cp.RawKernel(
+    r"""
 extern "C" __global__
 void patch_error(
     const int height,
@@ -76,10 +80,13 @@ void patch_error(
     }
     error[blockIdx.z * height * width + x * width + y] = e;
 }
-''', 'patch_error')
+""",
+    "patch_error",
+)
 
 
-pairwise_patch_error_kernel = cp.RawKernel(r'''
+pairwise_patch_error_kernel = cp.RawKernel(
+    r"""
 extern "C" __global__
 void pairwise_patch_error(
     const int height,
@@ -116,4 +123,6 @@ void pairwise_patch_error(
     }
     error[blockIdx.z * height * width + x * width + y] = e;
 }
-''', 'pairwise_patch_error')
+""",
+    "pairwise_patch_error",
+)

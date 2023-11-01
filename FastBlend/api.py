@@ -1,10 +1,20 @@
-from .runners import AccurateModeRunner, FastModeRunner, BalancedModeRunner, InterpolationModeRunner, InterpolationModeSingleFrameRunner
-from .data import VideoData, get_video_fps, save_video, search_for_images
 import os
+
 import gradio as gr
 
+from FastBlend.data import VideoData, get_video_fps, save_video, search_for_images
+from FastBlend.runners import (
+    AccurateModeRunner,
+    BalancedModeRunner,
+    FastModeRunner,
+    InterpolationModeRunner,
+    InterpolationModeSingleFrameRunner,
+)
 
-def check_input_for_blending(video_guide, video_guide_folder, video_style, video_style_folder):
+
+def check_input_for_blending(
+    video_guide, video_guide_folder, video_style, video_style_folder
+):
     frames_guide = VideoData(video_guide, video_guide_folder)
     frames_style = VideoData(video_style, video_style_folder)
     message = ""
@@ -37,10 +47,12 @@ def smooth_video(
     num_iter,
     guide_weight,
     initialize,
-    progress = None,
+    progress=None,
 ):
     # input
-    frames_guide, frames_style, message = check_input_for_blending(video_guide, video_guide_folder, video_style, video_style_folder)
+    frames_guide, frames_style, message = check_input_for_blending(
+        video_guide, video_guide_folder, video_style, video_style_folder
+    )
     if len(message) > 0:
         print(message)
     # output
@@ -70,11 +82,32 @@ def smooth_video(
         "tracking_window_size": tracking_window_size,
     }
     if mode == "Fast":
-        FastModeRunner().run(frames_guide, frames_style, batch_size=batch_size, window_size=window_size, ebsynth_config=ebsynth_config, save_path=frames_path)
+        FastModeRunner().run(
+            frames_guide,
+            frames_style,
+            batch_size=batch_size,
+            window_size=window_size,
+            ebsynth_config=ebsynth_config,
+            save_path=frames_path,
+        )
     elif mode == "Balanced":
-        BalancedModeRunner().run(frames_guide, frames_style, batch_size=batch_size, window_size=window_size, ebsynth_config=ebsynth_config, save_path=frames_path)
+        BalancedModeRunner().run(
+            frames_guide,
+            frames_style,
+            batch_size=batch_size,
+            window_size=window_size,
+            ebsynth_config=ebsynth_config,
+            save_path=frames_path,
+        )
     elif mode == "Accurate":
-        AccurateModeRunner().run(frames_guide, frames_style, batch_size=batch_size, window_size=window_size, ebsynth_config=ebsynth_config, save_path=frames_path)
+        AccurateModeRunner().run(
+            frames_guide,
+            frames_style,
+            batch_size=batch_size,
+            window_size=window_size,
+            ebsynth_config=ebsynth_config,
+            save_path=frames_path,
+        )
     # output
     try:
         fps = int(fps)
@@ -82,7 +115,9 @@ def smooth_video(
         fps = get_video_fps(video_style) if video_style is not None else 30
     print("Fps:", fps)
     print("Saving video...")
-    video_path = save_video(frames_path, video_path, num_frames=len(frames_style), fps=fps)
+    video_path = save_video(
+        frames_path, video_path, num_frames=len(frames_style), fps=fps
+    )
     print("Success!")
     print("Your frames are here:", frames_path)
     print("Your video is here:", video_path)
@@ -97,10 +132,10 @@ class KeyFrameMatcher:
         result = []
         number = -1
         for i in file_name:
-            if ord(i)>=ord("0") and ord(i)<=ord("9"):
+            if ord(i) >= ord("0") and ord(i) <= ord("9"):
                 if number == -1:
                     number = 0
-                number = number*10 + ord(i) - ord("0")
+                number = number * 10 + ord(i) - ord("0")
             else:
                 if number != -1:
                     result.append(number)
@@ -111,10 +146,12 @@ class KeyFrameMatcher:
         return result
 
     def extract_number_from_filenames(self, file_names):
-        numbers = [self.extract_number_from_filename(file_name) for file_name in file_names]
+        numbers = [
+            self.extract_number_from_filename(file_name) for file_name in file_names
+        ]
         min_length = min(len(i) for i in numbers)
-        for i in range(min_length-1, -1, -1):
-            if len(set(number[i] for number in numbers))==len(file_names):
+        for i in range(min_length - 1, -1, -1):
+            if len(set(number[i] for number in numbers)) == len(file_names):
                 return [number[i] for number in numbers]
         return list(range(len(file_names)))
 
@@ -131,7 +168,9 @@ class KeyFrameMatcher:
     def match_using_numbers(self, file_names_a, file_names_b):
         numbers_a = self.extract_number_from_filenames(file_names_a)
         numbers_b = self.extract_number_from_filenames(file_names_b)
-        numbers_b_dict = {number: file_name for number, file_name in zip(numbers_b, file_names_b)}
+        numbers_b_dict = {
+            number: file_name for number, file_name in zip(numbers_b, file_names_b)
+        }
         matched_file_name = []
         for number in numbers_a:
             if number in numbers_b_dict:
@@ -157,13 +196,13 @@ def detect_frames(frames_path, keyframes_path):
         return "Please input the directory of rendered frames"
     frames = [os.path.split(i)[-1] for i in search_for_images(frames_path)]
     keyframes = [os.path.split(i)[-1] for i in search_for_images(keyframes_path)]
-    if len(frames)==0:
+    if len(frames) == 0:
         return f"No images detected in {frames_path}"
-    if len(keyframes)==0:
+    if len(keyframes) == 0:
         return f"No images detected in {keyframes_path}"
     matched_keyframes = KeyFrameMatcher().match_filenames(frames, keyframes)
     max_filename_length = max([len(i) for i in frames])
-    if sum([i is not None for i in matched_keyframes])==0:
+    if sum([i is not None for i in matched_keyframes]) == 0:
         message = ""
         for frame, matched_keyframe in zip(frames, matched_keyframes):
             message += frame + " " * (max_filename_length - len(frame) + 1)
@@ -186,7 +225,9 @@ def check_input_for_interpolating(frames_path, keyframes_path):
     # match frames
     matched_keyframes = KeyFrameMatcher().match_filenames(frames, keyframes)
     file_list = [file_name for file_name in matched_keyframes if file_name is not None]
-    index_style = [i for i, file_name in enumerate(matched_keyframes) if file_name is not None]
+    index_style = [
+        i for i, file_name in enumerate(matched_keyframes) if file_name is not None
+    ]
     frames_guide = VideoData(None, frames_path)
     frames_style = VideoData(None, keyframes_path, file_list=file_list)
     # match shape
@@ -210,10 +251,12 @@ def interpolate_video(
     num_iter,
     guide_weight,
     initialize,
-    progress = None,
+    progress=None,
 ):
     # input
-    frames_guide, frames_style, index_style, message = check_input_for_interpolating(frames_path, keyframes_path)
+    frames_guide, frames_style, index_style, message = check_input_for_interpolating(
+        frames_path, keyframes_path
+    )
     if len(message) > 0:
         print(message)
     # output
@@ -235,19 +278,35 @@ def interpolate_video(
         "gpu_id": 0,
         "guide_weight": guide_weight,
         "initialize": initialize,
-        "tracking_window_size": tracking_window_size
+        "tracking_window_size": tracking_window_size,
     }
-    if len(index_style)==1:
-        InterpolationModeSingleFrameRunner().run(frames_guide, frames_style, index_style, batch_size=batch_size, ebsynth_config=ebsynth_config, save_path=output_frames_path)
+    if len(index_style) == 1:
+        InterpolationModeSingleFrameRunner().run(
+            frames_guide,
+            frames_style,
+            index_style,
+            batch_size=batch_size,
+            ebsynth_config=ebsynth_config,
+            save_path=output_frames_path,
+        )
     else:
-        InterpolationModeRunner().run(frames_guide, frames_style, index_style, batch_size=batch_size, ebsynth_config=ebsynth_config, save_path=output_frames_path)
+        InterpolationModeRunner().run(
+            frames_guide,
+            frames_style,
+            index_style,
+            batch_size=batch_size,
+            ebsynth_config=ebsynth_config,
+            save_path=output_frames_path,
+        )
     try:
         fps = int(fps)
     except:
         fps = 30
     print("Fps:", fps)
     print("Saving video...")
-    video_path = save_video(output_frames_path, output_video_path, num_frames=len(frames_guide), fps=fps)
+    video_path = save_video(
+        output_frames_path, output_video_path, num_frames=len(frames_guide), fps=fps
+    )
     print("Success!")
     print("Your frames are here:", output_frames_path)
     print("Your video is here:", video_path)
@@ -257,41 +316,110 @@ def interpolate_video(
 def on_ui_tabs():
     with gr.Blocks(analytics_enabled=False) as ui_component:
         with gr.Tab("Blend"):
-            gr.Markdown("""
+            gr.Markdown(
+                """
 # Blend
 
 Given a guide video and a style video, this algorithm will make the style video fluent according to the motion features of the guide video. Click [here](https://github.com/Artiprocher/sd-webui-fastblend/assets/35051019/208d902d-6aba-48d7-b7d5-cd120ebd306d) to see the example. Note that this extension doesn't support long videos. Please use short videos (e.g., several seconds). The algorithm is mainly designed for 512*512 resolution. Please use a larger `Minimum patch size` for higher resolution.
-            """)
+            """
+            )
             with gr.Row():
                 with gr.Column():
                     with gr.Tab("Guide video"):
                         video_guide = gr.Video(label="Guide video")
                     with gr.Tab("Guide video (images format)"):
-                        video_guide_folder = gr.Textbox(label="Guide video (images format)", value="")
+                        video_guide_folder = gr.Textbox(
+                            label="Guide video (images format)", value=""
+                        )
                 with gr.Column():
                     with gr.Tab("Style video"):
                         video_style = gr.Video(label="Style video")
                     with gr.Tab("Style video (images format)"):
-                        video_style_folder = gr.Textbox(label="Style video (images format)", value="")
+                        video_style_folder = gr.Textbox(
+                            label="Style video (images format)", value=""
+                        )
                 with gr.Column():
-                    output_path = gr.Textbox(label="Output directory", value="", placeholder="Leave empty to use the directory of style video")
-                    fps = gr.Textbox(label="Fps", value="", placeholder="Leave empty to use the default fps")
-                    video_output = gr.Video(label="Output video", interactive=False, show_share_button=True)
+                    output_path = gr.Textbox(
+                        label="Output directory",
+                        value="",
+                        placeholder="Leave empty to use the directory of style video",
+                    )
+                    fps = gr.Textbox(
+                        label="Fps",
+                        value="",
+                        placeholder="Leave empty to use the default fps",
+                    )
+                    video_output = gr.Video(
+                        label="Output video", interactive=False, show_share_button=True
+                    )
             btn = gr.Button(value="Blend")
             with gr.Row():
                 with gr.Column():
                     gr.Markdown("# Settings")
-                    mode = gr.Radio(["Fast", "Balanced", "Accurate"], label="Inference mode", value="Fast", interactive=True)
-                    window_size = gr.Slider(label="Sliding window size", value=15, minimum=1, maximum=1000, step=1, interactive=True)
-                    batch_size = gr.Slider(label="Batch size", value=8, minimum=1, maximum=128, step=1, interactive=True)
-                    tracking_window_size = gr.Slider(label="Tracking window size (only for accurate mode)", value=0, minimum=0, maximum=10, step=1, interactive=True)
+                    mode = gr.Radio(
+                        ["Fast", "Balanced", "Accurate"],
+                        label="Inference mode",
+                        value="Fast",
+                        interactive=True,
+                    )
+                    window_size = gr.Slider(
+                        label="Sliding window size",
+                        value=15,
+                        minimum=1,
+                        maximum=1000,
+                        step=1,
+                        interactive=True,
+                    )
+                    batch_size = gr.Slider(
+                        label="Batch size",
+                        value=8,
+                        minimum=1,
+                        maximum=128,
+                        step=1,
+                        interactive=True,
+                    )
+                    tracking_window_size = gr.Slider(
+                        label="Tracking window size (only for accurate mode)",
+                        value=0,
+                        minimum=0,
+                        maximum=10,
+                        step=1,
+                        interactive=True,
+                    )
                     gr.Markdown("## Advanced Settings")
-                    minimum_patch_size = gr.Slider(label="Minimum patch size (odd number)", value=5, minimum=5, maximum=99, step=2, interactive=True)
-                    num_iter = gr.Slider(label="Number of iterations", value=5, minimum=1, maximum=10, step=1, interactive=True)
-                    guide_weight = gr.Slider(label="Guide weight", value=10.0, minimum=0.0, maximum=100.0, step=0.1, interactive=True)
-                    initialize = gr.Radio(["identity", "random"], label="NNF initialization", value="identity", interactive=True)
+                    minimum_patch_size = gr.Slider(
+                        label="Minimum patch size (odd number)",
+                        value=5,
+                        minimum=5,
+                        maximum=99,
+                        step=2,
+                        interactive=True,
+                    )
+                    num_iter = gr.Slider(
+                        label="Number of iterations",
+                        value=5,
+                        minimum=1,
+                        maximum=10,
+                        step=1,
+                        interactive=True,
+                    )
+                    guide_weight = gr.Slider(
+                        label="Guide weight",
+                        value=10.0,
+                        minimum=0.0,
+                        maximum=100.0,
+                        step=0.1,
+                        interactive=True,
+                    )
+                    initialize = gr.Radio(
+                        ["identity", "random"],
+                        label="NNF initialization",
+                        value="identity",
+                        interactive=True,
+                    )
                 with gr.Column():
-                    gr.Markdown("""
+                    gr.Markdown(
+                        """
 # Reference
 
 * Output directory: the directory to save the video.
@@ -311,7 +439,8 @@ Given a guide video and a style video, this algorithm will make the style video 
     * Number of iterations: the number of iterations of patch matching. (Default: 5)
     * Guide weight: a parameter that determines how much motion feature applied to the style video. (Default: 10)
     * NNF initialization: how to initialize the NNF (Nearest Neighbor Field). (Default: identity)
-                    """)
+                    """
+                    )
             btn.click(
                 smooth_video,
                 inputs=[
@@ -328,44 +457,115 @@ Given a guide video and a style video, this algorithm will make the style video 
                     minimum_patch_size,
                     num_iter,
                     guide_weight,
-                    initialize
+                    initialize,
                 ],
-                outputs=[output_path, fps, video_output]
+                outputs=[output_path, fps, video_output],
             )
         with gr.Tab("Interpolate"):
-            gr.Markdown("""
+            gr.Markdown(
+                """
 # Interpolate
 
 Given a guide video and some rendered keyframes, this algorithm will render the remaining frames. Click [here](https://github.com/Artiprocher/sd-webui-fastblend/assets/35051019/3490c5b4-8f67-478f-86de-f9adc2ace16a) to see the example. The algorithm is experimental and is only tested for 512*512 resolution.
-            """)
+            """
+            )
             with gr.Row():
                 with gr.Column():
                     with gr.Row():
                         with gr.Column():
-                            video_guide_folder_ = gr.Textbox(label="Guide video (images format)", value="")
+                            video_guide_folder_ = gr.Textbox(
+                                label="Guide video (images format)", value=""
+                            )
                         with gr.Column():
-                            rendered_keyframes_ = gr.Textbox(label="Rendered keyframes (images format)", value="")
+                            rendered_keyframes_ = gr.Textbox(
+                                label="Rendered keyframes (images format)", value=""
+                            )
                     with gr.Row():
-                        detected_frames = gr.Textbox(label="Detected frames", value="Please input the directory of guide video and rendered frames", lines=9, max_lines=9, interactive=False)
-                    video_guide_folder_.change(detect_frames, inputs=[video_guide_folder_, rendered_keyframes_], outputs=detected_frames)
-                    rendered_keyframes_.change(detect_frames, inputs=[video_guide_folder_, rendered_keyframes_], outputs=detected_frames)
+                        detected_frames = gr.Textbox(
+                            label="Detected frames",
+                            value="Please input the directory of guide video and rendered frames",
+                            lines=9,
+                            max_lines=9,
+                            interactive=False,
+                        )
+                    video_guide_folder_.change(
+                        detect_frames,
+                        inputs=[video_guide_folder_, rendered_keyframes_],
+                        outputs=detected_frames,
+                    )
+                    rendered_keyframes_.change(
+                        detect_frames,
+                        inputs=[video_guide_folder_, rendered_keyframes_],
+                        outputs=detected_frames,
+                    )
                 with gr.Column():
-                    output_path_ = gr.Textbox(label="Output directory", value="", placeholder="Leave empty to use the directory of rendered keyframes")
-                    fps_ = gr.Textbox(label="Fps", value="", placeholder="Leave empty to use the default fps")
-                    video_output_ = gr.Video(label="Output video", interactive=False, show_share_button=True)
+                    output_path_ = gr.Textbox(
+                        label="Output directory",
+                        value="",
+                        placeholder="Leave empty to use the directory of rendered keyframes",
+                    )
+                    fps_ = gr.Textbox(
+                        label="Fps",
+                        value="",
+                        placeholder="Leave empty to use the default fps",
+                    )
+                    video_output_ = gr.Video(
+                        label="Output video", interactive=False, show_share_button=True
+                    )
             btn_ = gr.Button(value="Interpolate")
             with gr.Row():
                 with gr.Column():
                     gr.Markdown("# Settings")
-                    batch_size_ = gr.Slider(label="Batch size", value=8, minimum=1, maximum=128, step=1, interactive=True)
-                    tracking_window_size_ = gr.Slider(label="Tracking window size", value=0, minimum=0, maximum=10, step=1, interactive=True)
+                    batch_size_ = gr.Slider(
+                        label="Batch size",
+                        value=8,
+                        minimum=1,
+                        maximum=128,
+                        step=1,
+                        interactive=True,
+                    )
+                    tracking_window_size_ = gr.Slider(
+                        label="Tracking window size",
+                        value=0,
+                        minimum=0,
+                        maximum=10,
+                        step=1,
+                        interactive=True,
+                    )
                     gr.Markdown("## Advanced Settings")
-                    minimum_patch_size_ = gr.Slider(label="Minimum patch size (odd number, larger is better)", value=15, minimum=5, maximum=99, step=2, interactive=True)
-                    num_iter_ = gr.Slider(label="Number of iterations", value=5, minimum=1, maximum=10, step=1, interactive=True)
-                    guide_weight_ = gr.Slider(label="Guide weight", value=10.0, minimum=0.0, maximum=100.0, step=0.1, interactive=True)
-                    initialize_ = gr.Radio(["identity", "random"], label="NNF initialization", value="identity", interactive=True)
+                    minimum_patch_size_ = gr.Slider(
+                        label="Minimum patch size (odd number, larger is better)",
+                        value=15,
+                        minimum=5,
+                        maximum=99,
+                        step=2,
+                        interactive=True,
+                    )
+                    num_iter_ = gr.Slider(
+                        label="Number of iterations",
+                        value=5,
+                        minimum=1,
+                        maximum=10,
+                        step=1,
+                        interactive=True,
+                    )
+                    guide_weight_ = gr.Slider(
+                        label="Guide weight",
+                        value=10.0,
+                        minimum=0.0,
+                        maximum=100.0,
+                        step=0.1,
+                        interactive=True,
+                    )
+                    initialize_ = gr.Radio(
+                        ["identity", "random"],
+                        label="NNF initialization",
+                        value="identity",
+                        interactive=True,
+                    )
                 with gr.Column():
-                    gr.Markdown("""
+                    gr.Markdown(
+                        """
 # Reference
 
 * Output directory: the directory to save the video.
@@ -376,7 +576,8 @@ Given a guide video and some rendered keyframes, this algorithm will render the 
     * Number of iterations: the number of iterations of patch matching. (Default: 5)
     * Guide weight: a parameter that determines how much motion feature applied to the style video. (Default: 10)
     * NNF initialization: how to initialize the NNF (Nearest Neighbor Field). (Default: identity)
-                    """)
+                    """
+                    )
             btn_.click(
                 interpolate_video,
                 inputs=[
@@ -391,7 +592,7 @@ Given a guide video and some rendered keyframes, this algorithm will render the 
                     guide_weight_,
                     initialize_,
                 ],
-                outputs=[output_path_, fps_, video_output_]
+                outputs=[output_path_, fps_, video_output_],
             )
 
         return [(ui_component, "FastBlend", "FastBlend_ui")]
