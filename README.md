@@ -2,6 +2,8 @@
 
 This is a model-free algorithm that can make your video smooth. You can remove the flicker in your video, or render a fluent video using a series of keyframes.
 
+[paper](https://arxiv.org/abs/2311.09265)
+
 ## Usage
 
 ### Use FastBlend in [Stable-Diffusion-Webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
@@ -180,3 +182,14 @@ As we can see, FastBlend is competitive with CoDeF. What's more, FastBlend is ve
     * Number of iterations: the number of iterations of patch matching. (Default: 5)
     * Guide weight: a parameter that determines how much motion feature applied to the style video. (Default: 10)
     * NNF initialization: how to initialize the NNF (Nearest Neighbor Field). (Default: identity)
+
+### Cite this project
+
+```
+@article{duan2023fastblend,
+  title={FastBlend: a Powerful Model-Free Toolkit Making Video Stylization Easier},
+  author={Duan, Zhongjie and Wang, Chengyu and Chen, Cen and Qian, Weining and Huang, Jun and Jin, Mingyi},
+  journal={arXiv preprint arXiv:2311.09265},
+  year={2023}
+}
+```
