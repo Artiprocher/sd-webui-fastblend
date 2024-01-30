@@ -4,6 +4,8 @@ This is a model-free algorithm that can make your video smooth. You can remove t
 
 [paper](https://arxiv.org/abs/2311.09265)
 
+[ConfyUI-extension](https://github.com/AInseven/ComfyUI-fastblend)
+
 ## Usage
 
 ### Use FastBlend in [Stable-Diffusion-Webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
