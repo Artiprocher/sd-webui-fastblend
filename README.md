@@ -24,7 +24,7 @@ This is a model-free algorithm that can make your video smooth. You can remove t
 Install the packages in your Python environment:
 
 ```
-pip install gradio numpy imageio imageio[ffmpeg] opencv-python-headless tqdm cupy-cuda11x
+pip install gradio numpy imageio imageio[ffmpeg] opencv-python-headless tqdm cupy-cuda12x
 ```
 
 If your CUDA version is not v11.2 ~ 11.8, please read [this document](https://docs.cupy.dev/en/stable/install.html) and install the corressponding version of cupy.
